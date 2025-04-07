@@ -1,0 +1,32 @@
+% ttest 
+lfs = [495, 520, 510, 505, 480, 500, 515, 495, 510, 505, 490, 515, 495, 505, 500, 510, 485, 495, 500, 520, 510, 495, 505, 500, 515, 505, 495, 510, 500, 495];
+
+pop_mu = 500;
+alpha = 0.05;
+
+[h, p_value, ci, stats] = ttest(lfs, pop_mu, 'Alpha', alpha);
+
+fprintf('sample mean: %.2f\n', mean(lfs));
+fprintf('sample std dev: %.2f\n', std(lfs));
+fprintf('T statistic: %.4f\n', stats.tstat);
+fprintf('P value: %.4f\n', p_value);
+fprintf('reject null hyp: %s\n', string(h == 1));
+
+%oc curve
+true_mu = linspace(480, 520, 100); %range of true mean values
+n = length(lfs);
+sigma = 100; %assumed known population std dev for oc curve
+std_error = sigma / sqrt(n);
+
+%z-based for known std dev
+z_alpha = tinv(1 - alpha/2, n - 1);
+oc_curve = 1 - (normcdf(pop_mu + z_alpha * std_error, true_mu, std_error) - normcdf(pop_mu - z_alpha * std_error, true_mu, std_error));
+
+figure;
+plot(true_mu, oc_curve, 'b-', 'LineWidth', 1.5); hold on;
+yline(alpha, 'r--', 'LineWidth', 1.5);
+title('Operating Characteristic (OC) Curve');
+xlabel('True Mean Lifetime (hours)');
+ylabel('Probability of Rejecting Null Hypothesis');
+legend('OC Curve', 'Significance Level (5%)');
+grid on;
